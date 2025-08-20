@@ -1,0 +1,33 @@
+import random
+
+environment = {
+    'A': random.choice(['Clean', 'Dirty']),
+    'B': random.choice(['Clean', 'Dirty'])
+}
+
+location = random.choice(['A', 'B'])
+
+def show_status():
+    print(f"Environment: {environment}")
+    print(f"Agent is at location {location}")
+
+def vacuum_agent():
+    global location
+    show_status()
+
+    if environment[location] == 'Dirty':
+        print(f"Action: PICK dust at {location}")
+        environment[location] = 'Clean'
+    else:
+        if location == 'A':
+            print("Action: MOVE RIGHT to B")
+            location = 'B'
+        else:
+            print("Action: MOVE LEFT to A")
+            location = 'A'
+
+    show_status()
+
+for _ in range(4):
+    vacuum_agent()
+    print("-" * 30)
