@@ -1,0 +1,73 @@
+import math
+import random
+
+def print_board(state):
+    n = len(state)
+    for row in range(n):
+        line = ""
+        for col in range(n):
+            if state[col] == row:
+                line += "Q "
+            else:
+                line += ". "
+        print(line)
+    print()
+
+def compute_conflicts(state):
+    conflicts = 0
+    n = len(state)
+    for i in range(n):
+        for j in range(i + 1, n):
+            if state[i] == state[j] or abs(state[i] - state[j]) == abs(i - j):
+                conflicts += 1
+    return conflicts
+
+def random_neighbor(state):
+    n = len(state)
+    new_state = list(state)
+    col = random.randint(0, n - 1)
+    new_row = random.randint(0, n - 1)
+    while new_row == state[col]:
+        new_row = random.randint(0, n - 1)
+    new_state[col] = new_row
+    return new_state
+
+def simulated_annealing(initial_state, max_steps=10000, initial_temp=100.0, cooling_rate=0.99):
+    current = list(initial_state)
+    current_conflicts = compute_conflicts(current)
+    temperature = initial_temp
+    steps = 0
+
+    while temperature > 0.1 and steps < max_steps:
+        neighbor = random_neighbor(current)
+        neighbor_conflicts = compute_conflicts(neighbor)
+        delta_e = current_conflicts - neighbor_conflicts
+
+        if delta_e > 0 or random.random() < math.exp(delta_e / temperature):
+            current = neighbor
+            current_conflicts = neighbor_conflicts
+
+        if current_conflicts == 0:
+            return current, steps
+
+        temperature *= cooling_rate
+        steps += 1
+
+    return current, steps
+
+if __name__ == "__main__":
+    n = 8
+    initial_input = input(f"Enter initial state as 8 space-separated row indices (e.g., '0 4 7 5 2 6 1 3'): ")
+    initial_state = list(map(int, initial_input.strip().split()))
+
+    if len(initial_state) != n or any(r < 0 or r >= n for r in initial_state):
+        print("Invalid input. Please enter 8 integers between 0 and 7.")
+    else:
+        print("\n Initial Board:")
+        print_board(initial_state)
+
+        final_state, steps = simulated_annealing(initial_state)
+
+        print(" Final Board after Simulated Annealing:")
+        print_board(final_state)
+        print(f"Conflicts: {compute_conflicts(final_state)}, Steps taken: {steps}")
