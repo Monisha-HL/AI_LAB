@@ -1,0 +1,36 @@
+import itertools
+
+#Define propositional symbols
+symbols = ['Raining', 'WetGround', 'SprinklerOn']
+
+#Define the knowledge base:
+#Rule: If it's raining, then the ground is wet
+#Fact: It is raining
+def kb_model(model):
+    rule = (not model['Raining']) or model['WetGround']  
+    fact = model['Raining']  
+    return rule and fact
+
+query_input = input("Enter your query (e.g., WetGround or SprinklerOn): ").strip()
+
+all_models = list(itertools.product([True, False], repeat=len(symbols)))
+
+print("\nTruth Table:")
+print(f"{'Raining':<10} {'WetGround':<12} {'SprinklerOn':<13} {'KB Holds':<10} {'Query True':<12}")
+
+entailed = True
+
+for values in all_models:
+    model = dict(zip(symbols, values))
+    kb_holds = kb_model(model)
+    query_true = model.get(query_input, False)
+
+    print(f"{str(model['Raining']):<10} {str(model['WetGround']):<12} {str(model['SprinklerOn']):<13} {str(kb_holds):<10} {str(query_true):<12}")
+
+    if kb_holds and not query_true:
+        entailed = False
+
+if entailed:
+    print(f"\n The query '{query_input}' is entailed by the knowledge base.")
+else:
+    print(f"\n The query '{query_input}' is NOT entailed by the knowledge base.")
