@@ -1,0 +1,61 @@
+def is_variable(x):
+    return isinstance(x, str) and x[0].islower()
+
+def unify(x, y, subst={}):
+    if subst is None:
+        return None
+    elif x == y:
+        return subst
+    elif is_variable(x):
+        return unify_var(x, y, subst)
+    elif is_variable(y):
+        return unify_var(y, x, subst)
+    elif isinstance(x, list) and isinstance(y, list) and len(x) == len(y):
+        for xi, yi in zip(x, y):
+            subst = unify(xi, yi, subst)
+            if subst is None:
+                return None
+        return subst
+    else:
+        return None
+
+def unify_var(var, x, subst):
+    if var in subst:
+        return unify(subst[var], x, subst)
+    elif x in subst:
+        return unify(var, subst[x], subst)
+    elif occurs_check(var, x, subst):
+        return None
+    else:
+        subst[var] = x
+        return subst
+
+def occurs_check(var, x, subst):
+    if var == x:
+        return True
+    elif is_variable(x) and x in subst:
+        return occurs_check(var, subst[x], subst)
+    elif isinstance(x, list):
+        return any(occurs_check(var, xi, subst) for xi in x)
+    else:
+        return False
+
+def parse_expression(expr_str):
+    expr_str = expr_str.strip().replace(' ', '')
+    functor, args = expr_str.split('(')
+    args = args.rstrip(')').split(',')
+    return [functor] + args
+
+expr1_str = input("Enter first expression (e.g., P(x,A)): ")
+expr2_str = input("Enter second expression (e.g., P(B,A)): ")
+
+expr1 = parse_expression(expr1_str)
+expr2 = parse_expression(expr2_str)
+
+result = unify(expr1, expr2)
+
+if result:
+    print("\n Unification succeeded with substitution:")
+    print(result)
+else:
+    print("\n Unification failed.")
