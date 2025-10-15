@@ -1,0 +1,50 @@
+class KnowledgeBase:
+    def __init__(self):
+        self.facts = set()
+        self.rules = []
+
+    def add_fact(self, fact):
+        print(f" {fact}")
+        self.facts.add(fact)
+
+    def add_rule(self, premises, conclusion):
+        print(f"IF {', '.join(premises)} THEN {conclusion}")
+        self.rules.append((set(premises), conclusion))
+
+    def forward_chain(self, query):
+        print("\nStarting forward chaining to prove:", query)
+        inferred = set(self.facts)
+        changed = True
+
+        while changed:
+            changed = False
+            for premises, conclusion in self.rules:
+                if premises.issubset(inferred) and conclusion not in inferred:
+                    print(f"Inferred: {conclusion} because {', '.join(premises)}")
+                    inferred.add(conclusion)
+                    changed = True
+
+        if query in inferred:
+            print(f"\n Conclusion: {query} is TRUE. Robert is a criminal.")
+        else:
+            print(f"\n Conclusion: Could NOT prove {query} with the given knowledge.")
+
+print("Problem Statement:")
+print("As per the law, it is a crime for an American to sell weapons to hostile nations.")
+print("Country A, an enemy of America, has a missile.")
+print("The missile was sold to it by Robert, who is an American citizen.")
+print("We want to prove: Robert is a criminal.\n")
+
+print("First-Order Logic Translation:")
+kb = KnowledgeBase()
+
+kb.add_fact("American(Robert)")
+kb.add_fact("Enemy(CountryA, America)")
+kb.add_fact("Missile(M1)")
+kb.add_fact("Sells(Robert, M1, CountryA)")
+
+kb.add_rule(["Missile(M1)"], "Weapon(M1)")
+kb.add_rule(["Enemy(CountryA, America)"], "Hostile(CountryA)")
+kb.add_rule(["American(Robert)", "Weapon(M1)", "Hostile(CountryA)", "Sells(Robert, M1, CountryA)"], "Criminal(Robert)")
+
+kb.forward_chain("Criminal(Robert)")
